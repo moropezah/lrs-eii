@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add("js")</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ley Ricarte Soto en EII · Verificador y referencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --ink:#1B2430; --muted:#5A6573; --rule:#D8DEE5; --wash:#F2F5F8; --paper:#FFFFFF;
+  --ec:#1F4E79; --ec-wash:#E8EFF6;
+  --cu:#7A2E3A; --cu-wash:#F6EAEC;
+  --ok:#1E6B45; --ok-wash:#E6F2EB;
+  --warn:#8A5A00; --warn-wash:#FBF1DE;
+  --bad:#9B1C1C; --bad-wash:#FBE9E9;
+  --serif:"Newsreader", Georgia, "Times New Roman", serif;
+  --sans:"Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px 56px}
+header.top{padding:28px 0 18px;border-bottom:1px solid var(--rule)}
+header.top h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.6rem,4.5vw,2.3rem);line-height:1.15;margin:0 0 6px}
+header.top p{margin:0;color:var(--muted);max-width:68ch}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+button,.btn{font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+button:hover{background:var(--wash)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #7FA7CF;outline-offset:2px}
+button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.primary:hover{background:#2E3A49}
+
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:8px 20px 0}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:10px 12px;white-space:nowrap;color:var(--muted)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.panel{padding-top:22px}
+html.js .panel{display:none}
+html.js .panel.active{display:block}
+html:not(.js) nav.tabs,html:not(.js) #p-ver,html:not(.js) .toolbar{display:none}
+html:not(.js) .panel{border-top:1px solid var(--rule);margin-top:24px}
+h2{font-family:var(--serif);font-weight:600;font-size:1.55rem;margin:0 0 4px}
+h3{font-size:1.02rem;margin:22px 0 8px}
+.lede{color:var(--muted);margin:0 0 18px;max-width:70ch}
+.ec{--acc:var(--ec);--accw:var(--ec-wash)} .cu{--acc:var(--cu);--accw:var(--cu-wash)}
+
+/* Verificador */
+.scen{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:18px}
+.scen label{display:block;border:1px solid var(--rule);border-left:5px solid var(--acc);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--paper)}
+.scen input{position:absolute;opacity:0}
+.scen label:has(input:checked){background:var(--accw);border-color:var(--acc)}
+.scen label:has(input:focus-visible){outline:3px solid #7FA7CF;outline-offset:2px}
+.scen strong{display:block;font-size:.95rem}
+.scen span{font-size:.82rem;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--rule);border-radius:10px;padding:12px 14px 6px;margin:0 0 14px}
+legend{font-weight:700;font-size:.92rem;padding:0 6px}
+.hint{font-size:.82rem;color:var(--muted);margin:-2px 0 8px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--wash);font-size:.93rem}
+.chk:first-of-type{border-top:none}
+.chk input{margin-top:4px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--ink)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.meta label{font-size:.85rem;font-weight:600;display:flex;flex-direction:column;gap:4px;flex:1 1 180px}
+.meta input{font:inherit;font-weight:400;padding:8px 10px;border:1px solid var(--rule);border-radius:8px}
+.result{position:sticky;top:64px;border-radius:12px;padding:16px 18px;border:2px solid var(--rule);background:var(--wash)}
+.result.ok{border-color:var(--ok);background:var(--ok-wash)}
+.result.warn{border-color:var(--warn);background:var(--warn-wash)}
+.result.bad{border-color:var(--bad);background:var(--bad-wash)}
+.verdict{font-family:var(--serif);font-size:1.35rem;font-weight:600;line-height:1.2;margin:0 0 8px}
+.result ul{margin:6px 0 10px;padding-left:20px;font-size:.9rem}
+.result .kv{font-size:.9rem;margin:4px 0}
+.result .kv b{display:inline-block;min-width:92px}
+.result .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.toast{font-size:.82rem;color:var(--ok);min-height:1.2em;margin-top:6px}
+
+/* Referencia */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.box{border:1px solid var(--rule);border-top:4px solid var(--acc,var(--ink));border-radius:10px;padding:12px 16px}
+.box h3{margin-top:4px}
+.box ul,.box ol{padding-left:20px;margin:6px 0}
+.box li{margin:4px 0;font-size:.93rem}
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;margin:8px 0 16px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.9rem}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--rule)}
+th{background:var(--wash);font-weight:700}
+tr:last-child td{border-bottom:none}
+.tag{display:inline-block;font-size:.76rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--accw);color:var(--acc);white-space:nowrap}
+.key{background:var(--wash);border-radius:10px;padding:12px 16px;margin:14px 0;font-size:.93rem}
+.key b{display:block;margin-bottom:2px}
+.flag{background:var(--warn-wash);border-left:4px solid var(--warn);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:.9rem}
+.chg td:first-child{white-space:nowrap}
+.new{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:99px;background:var(--ok-wash);color:var(--ok);margin-left:4px}
+
+/* Cronología (secuencia real) */
+ol.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--rule)}
+ol.timeline li{position:relative;padding:0 0 18px 22px}
+ol.timeline li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--acc,var(--ink))}
+ol.timeline .when{font-weight:700;font-size:.9rem}
+ol.timeline .what{font-size:.93rem}
+ol.timeline .pending::before{border-style:dashed;background:var(--warn-wash);border-color:var(--warn)}
+
+footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--rule);font-size:.8rem;color:var(--muted)}
+footer ol{padding-left:18px}
+
+@media (prefers-reduced-motion:no-preference){.result{transition:background-color .2s,border-color .2s}}
+
+@media print{
+  nav.tabs,.toolbar,.result .actions,.toast,.scen{display:none!important}
+  .panel{display:block!important;padding-top:0;page-break-before:always}
+  .panel:first-of-type{page-break-before:auto}
+  .result{position:static}
+  body{font-size:11pt}
+  .tbl{overflow:visible} table{min-width:0}
+  a{color:inherit}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>Ley Ricarte Soto en enfermedad inflamatoria intestinal</h1>
+  <p>Verificador de postulación y resumen de los protocolos Minsal 2024: enfermedad de Crohn (quinta edición) y colitis ulcerosa (cuarta edición), con el Decreto N° 36. Cobertura vigente: solo anti-factor de necrosis tumoral (anti-TNF).</p>
+  <div class="toolbar">
+    <button type="button" class="primary" id="btnPrint">Imprimir o guardar PDF</button>
+    <button type="button" id="btnHtml">Descargar esta página</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Secciones">
+  <button role="tab" aria-selected="true" aria-controls="p-ver" id="t-ver">Verificador</button>
+  <button role="tab" aria-selected="false" aria-controls="p-chg" id="t-chg">Qué cambió en 2024</button>
+  <button role="tab" aria-selected="false" aria-controls="p-ec" id="t-ec">Enfermedad de Crohn</button>
+  <button role="tab" aria-selected="false" aria-controls="p-cu" id="t-cu">Colitis ulcerosa</button>
+  <button role="tab" aria-selected="false" aria-controls="p-exc" id="t-exc">Exclusión y suspensión</button>
+  <button role="tab" aria-selected="false" aria-controls="p-cro" id="t-cro">Cronología</button>
+  <button role="tab" aria-selected="false" aria-controls="p-cri" id="t-cri">Lectura crítica</button>
+</nav>
+
+<!-- VERIFICADOR -->
+<section class="panel active" id="p-ver" role="tabpanel" aria-labelledby="t-ver">
+  <h2>¿Cumple criterios para postular?</h2>
+  <p class="lede">Elige el escenario, marca lo que el paciente cumple y revisa el resultado. Criterios según los protocolos 2024. El resumen se puede copiar a la ficha o descargar.</p>
+  <div class="scen" role="radiogroup" aria-label="Escenario clínico" id="scenBox"></div>
+  <div class="grid2">
+    <div>
+      <div class="meta">
+        <label>Identificador del caso (opcional)<input id="caseId" type="text" placeholder="Iniciales, cama o ficha"></label>
+        <label>Fecha<input id="caseDate" type="date"></label>
+      </div>
+      <div id="critBox"></div>
+    </div>
+    <aside class="result" id="result" aria-live="polite"></aside>
+  </div>
+</section>
+
+<!-- CAMBIOS 2024 -->
+<section class="panel" id="p-chg" role="tabpanel" aria-labelledby="t-chg">
+  <h2>Qué cambió en 2024</h2>
+  <p class="lede">Según la minuta ministerial de modificaciones y el texto de los protocolos 2024, comparado con las ediciones de 2018 (Crohn) y 2019 (colitis ulcerosa).</p>
+
+  <h3>Cambios generales (todos los protocolos)</h3>
+  <div class="tbl chg"><table>
+    <thead><tr><th>Ítem</th><th>Antes</th><th>Protocolos 2024</th></tr></thead>
+    <tbody>
+      <tr><td>Validación</td><td>Comité de Expertos Clínicos del prestador aprobado</td><td>Se elimina el comité; la solicitud se valida en la plataforma Sistema de Información Ley Ricarte Soto (Fonasa)</td></tr>
+      <tr><td>Plazos</td><td>Desde la validación del comité</td><td>Desde la solicitud del tratamiento en la plataforma</td></tr>
+      <tr><td>Seguimiento</td><td>"Seguimiento"</td><td>"Continuidad de la atención": consultas y exámenes los cubre el seguro de salud del beneficiario, no la ley</td></tr>
+      <tr><td>Responsabilidad</td><td>Auditoría</td><td>Auditoría o fiscalización por Contraloría General de la República o Superintendencia de Salud</td></tr>
+      <tr><td>Documentos</td><td>Genéricos</td><td>Lista explícita de documentos obligatorios por subgrupo</td></tr>
+      <tr><td>Educación</td><td>"Una educación"</td><td>Al menos una sesión educativa previa; terapias subcutáneas: mínimo 4 sesiones de enfermería</td></tr>
+      <tr><td>Anexos</td><td>—</td><td>Formulario de constancia de información al paciente y asignación de prestador según seguro de salud</td></tr>
+      <tr><td>Vacunas</td><td>Neumococo, influenza, hepatitis B</td><td>Se agrega SARS-CoV-2</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="cols">
+    <div class="box" style="--acc:var(--ec)">
+      <h3>Enfermedad de Crohn (quinta edición)</h3>
+      <ul>
+        <li><b>IFX subcutáneo (SC)</b> solo como cambio desde IFX endovenoso (EV) en remisión; dosis, optimización y retorno a EV definidos. <span class="new">Nuevo</span></li>
+        <li><b>Corticorrefractariedad:</b> 3–5 días de corticoide EV (antes 7 días), o 4 semanas oral.</li>
+        <li><b>Cambio IFX ↔ ADA:</b> criterios explícitos: actividad clínica (Harvey-Bradshaw ≥8), de laboratorio, endoscópica o histológica. <span class="new">Nuevo</span></li>
+        <li><b>Optimización de ADA:</b> hasta 80 mg (antes 40 mg semanal); considerar niveles y anticuerpos.</li>
+        <li><b>Mantención EV:</b> se incorpora dosis de mantención y la opción de suspender premedicación si no hubo reacción en la inducción.</li>
+        <li><b>Infusión:</b> 2–3 horas.</li>
+        <li><b>Hepatitis B activa:</b> pasa de exclusión definitiva a suspensión transitoria. Patología psiquiátrica ya no figura como exclusión.</li>
+        <li><b>Suspensión transitoria</b> estructurada: infección aguda grave, cirugía, contraindicación clínica temporal, reacción adversa. <span class="new">Nuevo</span></li>
+        <li><b>Documentos:</b> admite fenotipo estenosante o penetrante y manifestaciones extraintestinales graves como respaldo de gravedad.</li>
+        <li><b>Pediatría:</b> en menores de 6 años, indicación a criterio del médico tratante.</li>
+        <li><b>Controles:</b> cada 6 meses el primer año, luego anual.</li>
+      </ul>
+    </div>
+    <div class="box" style="--acc:var(--cu)">
+      <h3>Colitis ulcerosa (cuarta edición)</h3>
+      <ul>
+        <li>Solicitud por gastroenterólogo o coloproctólogo, sin distinguir adulto o pediátrico.</li>
+        <li>Criterios de inclusión explícitamente para personas adultas y pediátricas.</li>
+        <li>Plazos desde la solicitud en plataforma: 3 días (grave hospitalizado), 30 días (moderada).</li>
+        <li>IFX 10 mg/kg y cambio ADA ↔ GOL se solicitan por formulario en plataforma.</li>
+        <li><b>Criterios de cambio ampliados:</b> falta de respuesta, actividad clínica (diarrea y sangre), de laboratorio, endoscópica o histológica, o reacción adversa. <span class="new">Nuevo</span></li>
+        <li>Documentos obligatorios: incluye estudio de <i>C. difficile</i> y citomegalovirus, escalas aplicadas y criterios de Oxford.</li>
+        <li>Sin cambios en fármacos, dosis, exclusiones ni tablas de control.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="key"><b>Sin nuevas familias terapéuticas</b>El Decreto N° 36 no incorporó nuevos mecanismos de acción para EII; lo único nuevo es IFX SC para Crohn.</div>
+</section>
+
+<!-- CROHN -->
+<section class="panel ec" id="p-ec" role="tabpanel" aria-labelledby="t-ec">
+  <h2>Enfermedad de Crohn</h2>
+  <p class="lede">Protocolos 2024, quinta edición. Fármacos garantizados: infliximab (IFX) o adalimumab (ADA). IFX SC solo como cambio desde IFX EV.</p>
+
+  <div class="cols">
+    <div class="box" style="--acc:var(--ec)">
+      <h3>Refractariedad</h3>
+      <ul>
+        <li><b>Corticorrefractario:</b> Harvey-Bradshaw (HB) ≥8, CDAI ≥220 o PCDAI ≥30 tras 3–5 días de corticoide EV o 4 semanas oral (prednisona 1 mg/kg/día o equivalente).</li>
+        <li><b>Inmunorrefractario:</b> misma actividad tras 6 meses de azatioprina ≥2 mg/kg/día o 6-mercaptopurina ≥1 mg/kg/día (o tope por leucopenia, o suspensión por efecto adverso), o metotrexato 25 mg/semana SC o IM (pediatría 15 mg/m², máximo 25 mg).</li>
+      </ul>
+    </div>
+    <div class="box" style="--acc:var(--ec)">
+      <h3>Plazos (desde la solicitud en plataforma)</h3>
+      <ul>
+        <li>EC grave hospitalizada: inicio ≤7 días; continuación de la inducción ≤10 días.</li>
+        <li>EC grave ambulatoria: ≤30 días.</li>
+        <li>Fístula perianal compleja: ≤30 días.</li>
+        <li>Ya en tratamiento antes de ser beneficiario: continuidad ≤30 días (≤7 días si hospitalizado).</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Criterios de inclusión</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Escenario</th><th>Obligatorios</th><th>Al menos uno</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag">Adulto, EC grave</span></td>
+        <td>Endoscopía compatible · biopsia compatible · consentimiento informado · corticorrefractario o inmunorrefractario</td>
+        <td>HB &gt;8 o CDAI &gt;220 · resección colónica, ≥2 resecciones de delgado, resección &gt;50 cm u ostomía · recurrencia postquirúrgica Rutgeerts i3–i4</td></tr>
+      <tr><td><span class="tag">Pediátrico, EC grave</span></td>
+        <td>Endoscopía · biopsia · consentimiento</td>
+        <td>PCDAI &gt;30 refractario · úlceras profundas, compromiso panentérico, talla Z &lt;−2,5, osteoporosis, estenosis inflamatoria o compromiso perianal</td></tr>
+      <tr><td><span class="tag">Fístula perianal compleja</span></td>
+        <td>Biopsia · resonancia magnética compatible · revisión bajo anestesia con setón · consentimiento</td>
+        <td>Con proctitis, estenosis rectal o fístula rectovaginal; o sin proctitis e inmunorrefractaria. IFX preferente.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="flag"><b>Documentos de gravedad (adultos):</b> la lista de documentos obligatorios agrega fenotipo estenosante o penetrante y manifestaciones extraintestinales graves (Crohn metastásico, pioderma gangrenoso refractario), que no están en los criterios 5–7. Basta adjuntar al menos un documento por subgrupo.</div>
+
+  <div class="cols">
+    <div class="box" style="--acc:var(--ec)">
+      <h3>Dosis y optimización</h3>
+      <ul>
+        <li><b>IFX:</b> 5 mg/kg EV semanas 0, 2 y 6, luego cada 8 semanas. Infusión de 2–3 horas. Premedicación en inducción: hidrocortisona 200 mg EV, paracetamol 1 g VO, clorfenamina 10 mg EV; en mantención, evaluar suspenderla si no hubo reacción.</li>
+        <li><b>ADA:</b> 160/80/40 mg SC semanas 0, 2 y 4, luego 40 mg cada 2 semanas. Pediatría &lt;40 kg: 80/40/20 mg, luego 20 mg cada 2 semanas.</li>
+        <li><b>Respuesta parcial</b> (solicitud en plataforma): IFX 10 mg/kg con frecuencia a evaluar; ADA hasta 80 mg (el texto dice semanal); idealmente con niveles y anticuerpos.</li>
+        <li>Se recomienda inmunomodulador concomitante.</li>
+      </ul>
+    </div>
+    <div class="box" style="--acc:var(--ec)">
+      <h3>Cambios de terapia</h3>
+      <ul>
+        <li><b>IFX ↔ ADA:</b> por formulario en plataforma, si hay actividad clínica (HB ≥8), de laboratorio, endoscópica o histológica, o reacción adversa o intolerancia.</li>
+        <li><b>IFX EV → SC:</b> ver recuadro.</li>
+        <li><b>IFX SC → EV:</b> si no mantiene remisión clínica o hay actividad endoscópica.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box" style="--acc:var(--ec);margin-top:16px">
+    <h3>Cambio de IFX EV a IFX SC</h3>
+    <div class="cols">
+      <div>
+        <b>Pueden optar (en remisión)</b>
+        <ul>
+          <li>Dosis EV estable de 5 o 10 mg/kg cada 6–8 semanas.</li>
+          <li>Clínicamente asintomático: número de deposiciones normalizado, sin rectorragia.</li>
+          <li>Calprotectina fecal &lt;200 μg/g.</li>
+          <li>Decisión conjunta con el equipo tratante.</li>
+        </ul>
+        <b>No pueden optar</b>
+        <ul>
+          <li>Quienes no desean el cambio.</li>
+          <li>Personas con EC que tengan enfermedad perianal.</li>
+          <li>No respondedores a anti-TNF, o con dosis &gt;10 mg/kg cada 4 semanas.</li>
+        </ul>
+      </div>
+      <div>
+        <b>Esquema</b>
+        <ul>
+          <li>120 mg SC cada 2 semanas, sin premedicación.</li>
+          <li>Optimización: 240 mg cada 2 semanas ante pérdida de respuesta o actividad por biomarcadores, colonoscopía o niveles bajos.</li>
+          <li>Educación de enfermería: mínimo 4 sesiones; si no logra autoadministración segura, se administra en el prestador.</li>
+          <li>Documento: informe médico de dosis estable, remisión clínica y calprotectina &lt;200 μg/g.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="key"><b>Definiciones de desenlace</b>Respuesta parcial: HB &gt;4 y &lt;8, calprotectina en descenso pero &gt;201 μg/g. Remisión: HB &lt;4, calprotectina &lt;200 μg/g y SES-CD &lt;2 (o imagen sin inflamación si el delgado no es accesible). No respondedor: HB sin cambio o peor. Pérdida de respuesta: deterioro de CDAI o HB tras responder a la inducción. Fístula: respuesta parcial con ≥50% menos secreción sin abscesos; remisión con cierre del orificio externo.</div>
+
+  <h3>Continuidad de la atención</h3>
+  <ul>
+    <li>Control médico cada 6 meses el primer año y luego anual.</li>
+    <li>Hemograma, PCR y pruebas hepáticas en semanas 4, 10–12 (antes de la mantención), 24, 36 y 52.</li>
+    <li>Calprotectina fecal (opcional), IGRA o PPD, colonoscopía con biopsia y entero-RM o entero-TC (si el delgado no es accesible) en el primer año.</li>
+    <li>Fístula: calprotectina en cada control, colonoscopía o rectoscopía, evaluación por coloproctólogo con retiro de setones.</li>
+  </ul>
+</section>
+
+<!-- CU -->
+<section class="panel cu" id="p-cu" role="tabpanel" aria-labelledby="t-cu">
+  <h2>Colitis ulcerosa</h2>
+  <p class="lede">Protocolos 2024, cuarta edición. Fármacos garantizados: golimumab (GOL), ADA e IFX, según subgrupo.</p>
+
+  <div class="tbl"><table>
+    <thead><tr><th>Subgrupo</th><th>Fármaco</th><th>Plazo desde la solicitud</th></tr></thead>
+    <tbody>
+      <tr><td>Adulto, CU moderada inmunorrefractaria</td><td>GOL o ADA</td><td>30 días</td></tr>
+      <tr><td>Adulto, CU grave corticorrefractaria (hospitalizado)</td><td>IFX</td><td>3 días</td></tr>
+      <tr><td>Pediátrico, CU grave corticorrefractaria</td><td>IFX</td><td>3 días</td></tr>
+      <tr><td>Pediátrico, CU moderada inmunorrefractaria</td><td>IFX</td><td>30 días</td></tr>
+      <tr><td>Ya en tratamiento antes de ser beneficiario</td><td>El mismo</td><td>30 días (3 días si crisis corticorrefractaria hospitalizada)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="key"><b>Punto a recordar</b>El adulto con CU moderada no accede a IFX por esta vía; solo a GOL o ADA. No hay IFX SC para CU.</div>
+
+  <div class="cols">
+    <div class="box" style="--acc:var(--cu)">
+      <h3>Inclusión: crisis grave corticorrefractaria</h3>
+      <ol>
+        <li>Colonoscopía compatible.</li>
+        <li>Biopsia compatible.</li>
+        <li>Estudio iniciado de <i>Clostridioides difficile</i> (PCR o toxina) y citomegalovirus en biopsia negativa (idealmente inmunohistoquímica).</li>
+        <li>Crisis grave por Mayo, Truelove &amp; Witts o PUCAI.</li>
+        <li>Criterios de Oxford: sin respuesta a hidrocortisona 100 mg cada 8 horas EV por 3–5 días, con &gt;8 deposiciones/24 h, o 3–8 deposiciones con PCR &gt;45 mg/L (9 veces el valor normal). En niños, PUCAI &gt;45 al día 3 o &gt;65 al día 5.</li>
+        <li>Consentimiento informado.</li>
+      </ol>
+    </div>
+    <div class="box" style="--acc:var(--cu)">
+      <h3>Inclusión: moderada inmunorrefractaria</h3>
+      <ol>
+        <li>Colonoscopía compatible.</li>
+        <li>Biopsia compatible.</li>
+        <li>Falla o intolerancia a 5-aminosalicilatos (5-ASA).</li>
+        <li>Falla a inmunosupresores en dosis adecuada tras 24 semanas (azatioprina ≥2 mg/kg/día o 6-mercaptopurina ≥1 mg/kg/día), o intolerancia.</li>
+        <li>Consentimiento informado.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="cols" style="margin-top:16px">
+    <div class="box" style="--acc:var(--cu)">
+      <h3>Dosis</h3>
+      <ul>
+        <li><b>IFX</b> (adultos y niños): 5 mg/kg EV semanas 0, 2 y 6, luego cada 8 semanas; 10 mg/kg por solicitud en plataforma. Respuesta esperable en 14 semanas.</li>
+        <li><b>GOL:</b> 200 mg SC semana 0 y 100 mg semana 2; luego 50 mg cada 4 semanas si &lt;80 kg, o 100 mg cada 4 semanas si ≥80 kg. Evaluar en semanas 12–14.</li>
+        <li><b>ADA:</b> 160 mg semana 0 y 80 mg semana 2, luego 40 mg cada 2 semanas. Evaluar en semanas 12–14.</li>
+      </ul>
+    </div>
+    <div class="box" style="--acc:var(--cu)">
+      <h3>Respuesta, remisión y cambio</h3>
+      <ul>
+        <li>Respuesta: Mayo ↓ ≥3 puntos o ≥30%, más subscore de sangrado ↓ ≥1 o de 0–1.</li>
+        <li>Remisión: Mayo ≤2 sin ningún subscore &gt;1. En pediatría, PUCAI &lt;10.</li>
+        <li><b>Cambio GOL ↔ ADA</b> (adulto moderado) por formulario en plataforma si hay falta de respuesta, actividad clínica (diarrea y sangre), de laboratorio, endoscópica o histológica, o reacción adversa que impida continuar.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Controles posteriores</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Examen</th><th>Basal</th><th>Sem 4</th><th>Sem 13</th><th>Sem 24</th><th>Sem 52</th></tr></thead>
+    <tbody>
+      <tr><td>Quantiferón</td><td>✓</td><td></td><td></td><td></td><td>✓</td></tr>
+      <tr><td>Hemograma, PCR, pruebas hepáticas</td><td>✓</td><td>✓ (solo grave)</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Calprotectina fecal</td><td>✓</td><td></td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Colonoscopía</td><td>✓</td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- EXCLUSIONES -->
+<section class="panel" id="p-exc" role="tabpanel" aria-labelledby="t-exc">
+  <h2>Exclusión y suspensión</h2>
+  <p class="lede">Desde 2024 los protocolos de Crohn y colitis ulcerosa ya no son idénticos en este punto.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Criterio</th><th>Crohn 2024</th><th>Colitis ulcerosa 2024</th></tr></thead>
+    <tbody>
+      <tr><td>Insuficiencia cardiaca NYHA III–IV</td><td>Exclusión definitiva</td><td>Exclusión definitiva</td></tr>
+      <tr><td>Enfermedad desmielinizante</td><td>Exclusión definitiva</td><td>Exclusión definitiva</td></tr>
+      <tr><td>Alergia grave a anti-TNF</td><td>Exclusión definitiva</td><td>Exclusión definitiva</td></tr>
+      <tr><td>Hepatitis B activa</td><td>Suspensión transitoria</td><td>Exclusión definitiva</td></tr>
+      <tr><td>Infección sistémica o absceso no tratado</td><td>Suspensión transitoria</td><td>Exclusión temporal</td></tr>
+      <tr><td>Infección aguda grave o cirugía</td><td>Suspensión transitoria</td><td>—</td></tr>
+      <tr><td>Vacuna a virus vivo en 4 semanas</td><td>Suspensión transitoria</td><td>Exclusión temporal</td></tr>
+      <tr><td>Cáncer o melanoma sin autorización del oncólogo</td><td>Suspensión transitoria</td><td>Exclusión temporal</td></tr>
+      <tr><td>VIH sin autorización del infectólogo</td><td>Suspensión transitoria</td><td>Exclusión temporal</td></tr>
+      <tr><td>Tuberculosis activa o latente</td><td>Suspensión transitoria</td><td>Exclusión temporal (latente: autorización del infectólogo)</td></tr>
+      <tr><td>Patología psiquiátrica no controlada</td><td>No figura</td><td>Exclusión temporal (con informe del psiquiatra)</td></tr>
+      <tr><td>Reacción adversa</td><td>Suspensión transitoria (registrar en plataforma)</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="cols">
+    <div class="box"><h3>Suspensión definitiva (ambos)</h3><ul><li>Falta de respuesta.</li><li>Pérdida de respuesta.</li><li>Reacción adversa con riesgo vital (notificar al Instituto de Salud Pública y adjuntar en plataforma).</li></ul></div>
+    <div class="box"><h3>Requisitos previos</h3><ul><li>Tuberculosis: historia, radiografía de tórax, IGRA o PPD.</li><li>Serologías: VIH, HBsAg, anti-HBc, anti-VHC.</li><li>Vacunas: neumococo, influenza, hepatitis B (CU), SARS-CoV-2; en niños, varicela (y virus papiloma en Crohn &gt;9 años).</li></ul></div>
+  </div>
+</section>
+
+<!-- CRONOLOGÍA -->
+<section class="panel" id="p-cro" role="tabpanel" aria-labelledby="t-cro">
+  <h2>Cronología</h2>
+  <p class="lede">Hitos normativos y ediciones de protocolos aplicados a EII.</p>
+  <ol class="timeline">
+    <li><div class="when">Junio 2015</div><div class="what">Ley 20.850 promulgada (1 de junio) y publicada (6 de junio).</div></li>
+    <li style="--acc:var(--ec)"><div class="when">Diciembre 2016</div><div class="what">Decreto N° 50 (segundo decreto) incorpora Crohn con IFX o ADA. Protocolo de Crohn, primera edición.</div></li>
+    <li style="--acc:var(--ec)"><div class="when">1 de enero 2017</div><div class="what">Entra en vigencia la cobertura para Crohn.</div></li>
+    <li style="--acc:var(--ec)"><div class="when">Marzo 2018</div><div class="what">Protocolo de Crohn, segunda edición.</div></li>
+    <li style="--acc:var(--cu)"><div class="when">Enero y junio 2019</div><div class="what">Protocolo de CU, primera y segunda edición. Crohn, tercera edición (junio).</div></li>
+    <li style="--acc:var(--cu)"><div class="when">1 de julio 2019</div><div class="what">DS N° 2 de 2019 (cuarto decreto) en vigencia: IFX para CU grave corticorrefractaria; GOL o ADA para CU moderada inmunorrefractaria.</div></li>
+    <li><div class="when">2021–2022</div><div class="what">Crohn, cuarta edición; CU, tercera edición.</div></li>
+    <li style="--acc:var(--cu)"><div class="when">Noviembre 2023</div><div class="what">Evaluación de tecnologías sanitarias en CU: no favorable para ustekinumab ni vedolizumab.</div></li>
+    <li style="--acc:var(--ec)"><div class="when">26 de agosto 2024</div><div class="what">Se promulga el Decreto N° 36, que modifica el DS N° 2 de 2019.</div></li>
+    <li><div class="when">2024</div><div class="what">Protocolos 2024: Crohn quinta edición (incorpora IFX SC) y CU cuarta edición. Se elimina el Comité de Expertos Clínicos.</div></li>
+    <li style="--acc:var(--ec)"><div class="when">13 de enero 2025</div><div class="what">Decreto N° 36 publicado en el Diario Oficial (N° 44.047).</div></li>
+    <li style="--acc:var(--ec)"><div class="when">1 de junio 2025</div><div class="what">Versión vigente según la Biblioteca del Congreso Nacional.</div></li>
+    <li class="pending"><div class="when">1 de julio 2025</div><div class="what">Fecha de aplicación informada por las agrupaciones de pacientes. Posteriormente denuncian que ningún paciente había podido acceder al IFX SC.</div></li>
+  </ol>
+</section>
+
+<!-- CRÍTICA -->
+<section class="panel" id="p-cri" role="tabpanel" aria-labelledby="t-cri">
+  <h2>Lectura crítica</h2>
+  <p class="lede">Brechas frente a las guías vigentes (AGA 2024, ECCO 2024) e inconsistencias internas de los protocolos 2024.</p>
+  <h3>Frente a las guías</h3>
+  <div class="cols">
+    <div class="box"><h3>Secuencia truncada</h3><p>Tras falla a anti-TNF solo se permite cambiar dentro de la clase (IFX ↔ ADA en Crohn; GOL ↔ ADA en CU). Las guías priorizan cambiar de mecanismo tras falla primaria.</p></div>
+    <div class="box"><h3>Definiciones antiguas</h3><p>La gravedad en Crohn sigue basada en HB y CDAI, no en SES-CD. No hay objetivos según STRIDE-II ni monitorización proactiva de niveles.</p></div>
+    <div class="box"><h3>Cobertura parcial</h3><p>Se cubre solo el fármaco. La administración EV y los controles dependen del seguro del paciente.</p></div>
+    <div class="box"><h3>IFX SC restringido</h3><p>Solo cambio en Crohn en remisión, sin inicio SC ni uso en CU. Excluye la enfermedad perianal actual y al paciente en 10 mg/kg cada 4 semanas.</p></div>
+  </div>
+  <h3>Inconsistencias internas</h3>
+  <div class="flag"><b>Comité de expertos:</b> la minuta lo elimina, pero el protocolo de Crohn aún indica solicitar el cambio IFX ↔ ADA "al Comité de Expertos Clínicos"; la sección de criterios de cambio dice "por formulario en la plataforma".</div>
+  <div class="flag"><b>ADA intensificado:</b> el texto dice "hasta 80 mg semanal", pero la referencia citada (Motoya 2017) estudia 80 mg cada 2 semanas.</div>
+  <div class="flag"><b>Premedicación de IFX en mantención:</b> una sección permite suspenderla si no hubo reacción en la inducción; la sección siguiente la mantiene previa a cada infusión.</div>
+  <div class="flag"><b>Gravedad en Crohn:</b> la lista de documentos acepta fenotipo estenosante o penetrante y manifestaciones extraintestinales graves, que no están en los criterios de inclusión 5–7.</div>
+  <div class="flag"><b>Oxford en CU:</b> el criterio de inclusión menciona PCR &gt;45 mg/L o 9 veces el valor normal; el documento obligatorio solo pide respaldar 9 veces el valor normal.</div>
+  <div class="flag"><b>Asimetría EC/CU:</b> hepatitis B activa es suspensión transitoria en Crohn y exclusión definitiva en CU; patología psiquiátrica desaparece en Crohn y se mantiene en CU.</div>
+</section>
+
+<footer>
+  <b>Fuentes</b>
+  <ol>
+    <li>Minsal. Protocolos 2024: Tratamiento con infliximab o adalimumab para personas con enfermedad de Crohn grave refractaria a tratamiento habitual. Quinta edición. Ley 20.850.</li>
+    <li>Minsal. Protocolos 2024: Tratamiento con golimumab o adalimumab para personas con colitis ulcerosa moderada e infliximab en personas con colitis ulcerosa grave, refractaria al tratamiento de primera línea. Cuarta edición. Ley 20.850.</li>
+    <li>Minsal, Departamento de Evaluación de Tecnologías Sanitarias y Salud Basada en Evidencia. Minuta de modificaciones a los protocolos vigentes de la Ley 20.850.</li>
+    <li>Decreto N° 36 de 2024: modifica el DS N° 2 de 2019. Promulgación 26 de agosto 2024; Diario Oficial 13 de enero 2025; versión vigente 1 de junio 2025 (Biblioteca del Congreso Nacional).</li>
+    <li>Minsal. Protocolo Enfermedad de Crohn, segunda edición, marzo 2018; Protocolo Colitis Ulcerosa, primera edición, enero 2019 (para comparación).</li>
+    <li>Minsal. Informe de evaluación científica: tofacitinib, ustekinumab y vedolizumab en colitis ulcerosa. Noviembre 2023.</li>
+  </ol>
+  <p>Herramienta de apoyo docente. La validación final se realiza en la plataforma Sistema de Información Ley Ricarte Soto de Fonasa.</p>
+</footer>
+</div>
+<script>
+(function(){
+  const tabs=[...document.querySelectorAll('nav.tabs button')];
+  function show(t){
+    tabs.forEach(b=>{const on=b===t;b.setAttribute('aria-selected',on);document.getElementById(b.getAttribute('aria-controls')).classList.toggle('active',on);});
+    t.scrollIntoView({block:'nearest',inline:'nearest'});
+  }
+  tabs.forEach((b,i)=>{
+    b.addEventListener('click',()=>show(b));
+    b.addEventListener('keydown',e=>{
+      if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const n=tabs[(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length];n.focus();show(n);}
+    });
+  });
+
+  const EC_DEF=[['d1','Insuficiencia cardiaca NYHA III–IV'],['d2','Enfermedad desmielinizante'],['d3','Alergia grave a anti-TNF']];
+  const EC_TMP=[['t1','Hepatitis B activa'],['t2','Infección sistémica activa, absceso no tratado o infección aguda grave'],['t3','Cirugía reciente o programada'],['t4','Vacuna a virus vivo en las últimas 4 semanas'],['t5','Cáncer o melanoma tratado sin autorización del oncólogo'],['t6','VIH sin autorización del infectólogo'],['t7','Tuberculosis activa o latente']];
+  const CU_DEF=[['d0','Hepatitis B activa'],['d1','Insuficiencia cardiaca NYHA III–IV'],['d2','Enfermedad desmielinizante'],['d3','Alergia grave a anti-TNF']];
+  const CU_TMP=[['t2','Infección sistémica activa o absceso no tratado'],['t4','Vacuna a virus vivo en las últimas 4 semanas'],['t5','Cáncer o melanoma tratado sin autorización del oncólogo'],['t6','VIH sin autorización del infectólogo'],['t8','Patología psiquiátrica no controlada'],['t7','Tuberculosis activa, o latente sin autorización del infectólogo']];
+
+  const S={
+    ecg:{cls:'ec',title:'Crohn grave, adulto',sub:'IFX o ADA',drug:'Infliximab o adalimumab',
+      plazo:'Desde la solicitud en plataforma: hospitalizado ≤7 días (continuación de inducción ≤10 días); ambulatorio ≤30 días.',
+      req:[['r1','Endoscopía (alta, colonoscopía o enteroscopía) compatible con EC'],['r2','Biopsia compatible con EC'],['r3','Consentimiento informado firmado'],['r4','Corticorrefractario (HB ≥8 o CDAI ≥220 tras 3–5 días EV o 4 semanas oral) o inmunorrefractario (6 meses de tiopurina o metotrexato)']],
+      any:{t:'Gravedad (al menos uno)',items:[['a1','HB >8 o CDAI >220'],['a2','Resección colónica, ≥2 resecciones de delgado, resección >50 cm u ostomía por EC'],['a3','Recurrencia postquirúrgica Rutgeerts i3–i4']]},def:EC_DEF,tmp:EC_TMP,tmpLabel:'Suspensión transitoria'},
+    ecf:{cls:'ec',title:'Crohn con fístula perianal compleja',sub:'IFX preferente o ADA',drug:'Infliximab (preferente) o adalimumab',
+      plazo:'≤30 días desde la solicitud en plataforma.',
+      req:[['r1','Biopsia compatible con EC'],['r2','Resonancia magnética compatible con fístula compleja'],['r3','Revisión bajo anestesia por coloproctólogo con setón'],['r4','Consentimiento informado firmado']],
+      any:{t:'Fenotipo (al menos uno)',items:[['a1','Fístula compleja con proctitis, estenosis rectal o rectovaginal'],['a2','Fístula compleja sin proctitis e inmunorrefractaria']]},def:EC_DEF,tmp:EC_TMP,tmpLabel:'Suspensión transitoria'},
+    sc:{cls:'ec',title:'Crohn: cambio IFX EV a SC',sub:'Mantención en remisión',drug:'Infliximab subcutáneo 120 mg cada 2 semanas',
+      plazo:'Sin premedicación. Optimizar a 240 mg cada 2 semanas ante pérdida de respuesta; volver a EV si no mantiene remisión.',
+      req:[['r1','Beneficiario LRS en remisión con IFX EV'],['r2','Dosis EV estable de 5 o 10 mg/kg cada 6–8 semanas'],['r3','Asintomático: deposiciones normalizadas, sin rectorragia'],['r4','Calprotectina fecal <200 μg/g'],['r5','Decisión conjunta con el equipo tratante']],
+      stop:[['s1','No desea el cambio'],['s2','Enfermedad perianal'],['s3','No respondedor a anti-TNF'],['s4','Dosis mayor a 10 mg/kg cada 4 semanas']]},
+    cug:{cls:'cu',title:'CU grave corticorrefractaria',sub:'IFX, hospitalizado (adulto o niño)',drug:'Infliximab',
+      plazo:'≤3 días desde la solicitud en plataforma.',
+      req:[['r1','Colonoscopía compatible con CU'],['r2','Biopsia compatible con CU'],['r3','Estudio iniciado de C. difficile y CMV en biopsia'],['r4','Crisis grave por Mayo, Truelove & Witts o PUCAI'],['r5','Oxford: sin respuesta a hidrocortisona 100 mg c/8 h EV por 3–5 días con >8 deposiciones, o 3–8 con PCR >45 mg/L (niños: PUCAI >45 día 3 o >65 día 5)'],['r6','Consentimiento informado firmado']],def:CU_DEF,tmp:CU_TMP,tmpLabel:'Exclusión temporal'},
+    cum:{cls:'cu',title:'CU moderada inmunorrefractaria',sub:'Adulto: GOL o ADA',drug:'Golimumab o adalimumab (en niños, infliximab)',
+      plazo:'≤30 días desde la solicitud en plataforma.',
+      req:[['r1','Colonoscopía compatible con CU'],['r2','Biopsia compatible con CU'],['r3','Falla o intolerancia a 5-ASA'],['r4','Falla a inmunosupresores en dosis adecuada tras 24 semanas, o intolerancia'],['r5','Consentimiento informado firmado']],def:CU_DEF,tmp:CU_TMP,tmpLabel:'Exclusión temporal'}
+  };
+  let cur='ecg';
+
+  const scenBox=document.getElementById('scenBox');
+  scenBox.innerHTML=Object.entries(S).map(([k,s])=>
+    `<label class="${s.cls}"><input type="radio" name="scen" value="${k}" ${k===cur?'checked':''}><strong>${s.title}</strong><span>${s.sub}</span></label>`).join('');
+  scenBox.addEventListener('change',e=>{if(e.target.name==='scen'&&S[e.target.value]){cur=e.target.value;renderCrit();}});
+
+  const critBox=document.getElementById('critBox');
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const cb=(id,l)=>`<label class="chk"><input type="checkbox" data-id="${id}"><span>${esc(l)}</span></label>`;
+  const fs=(leg,items,pre,hint)=>`<fieldset><legend>${leg}</legend>${hint?'<p class="hint">Marca solo si está presente.</p>':''}${items.map(r=>cb(pre+r[0],r[1])).join('')}</fieldset>`;
+  function renderCrit(){
+    const s=S[cur];let h=fs('Obligatorios',s.req,'req_');
+    if(s.any)h+=fs(s.any.t,s.any.items,'any_');
+    if(s.stop)h+=fs('No puede optar si',s.stop,'st_',1);
+    if(s.def)h+=fs('Exclusión definitiva',s.def,'xd_',1);
+    if(s.tmp)h+=fs(s.tmpLabel,s.tmp,'xt_',1);
+    critBox.innerHTML=h;evalNow();
+  }
+  critBox.addEventListener('change',evalNow);
+  document.getElementById('caseId').addEventListener('input',evalNow);
+  const dateEl=document.getElementById('caseDate');
+  dateEl.value=new Date().toISOString().slice(0,10);
+  dateEl.addEventListener('input',evalNow);
+
+  let lastSummary='';
+  function evalNow(){
+    const s=S[cur];
+    const val=id=>{const el=critBox.querySelector(`[data-id="${id}"]`);return !!(el&&el.checked);};
+    const pick=(arr,pre)=>arr?arr.filter(r=>val(pre+r[0])).map(r=>r[1]):[];
+    const missReq=s.req.filter(r=>!val('req_'+r[0])).map(r=>r[1]);
+    const anyMet=s.any?pick(s.any.items,'any_'):[];
+    const anyOk=!s.any||anyMet.length>0;
+    const st=pick(s.stop,'st_'), xd=pick(s.def,'xd_'), xt=pick(s.tmp,'xt_');
+
+    let state,verdict;
+    if(st.length){state='bad';verdict='No puede optar al cambio a IFX SC';}
+    else if(xd.length){state='bad';verdict='No elegible: exclusión definitiva';}
+    else if(missReq.length||!anyOk){state='';verdict='Faltan criterios';}
+    else if(xt.length){state='warn';verdict='Cumple inclusión; diferir hasta resolver la contraindicación temporal';}
+    else{state='ok';verdict=cur==='sc'?'Cumple criterios de cambio a IFX SC':'Cumple criterios para postular';}
+
+    const R=document.getElementById('result');R.className='result '+state;
+    const ul=a=>`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+    let h=`<p class="verdict">${verdict}</p>`;
+    h+=`<p class="kv"><b>Escenario</b>${esc(s.title)}</p><p class="kv"><b>Fármaco</b>${esc(s.drug)}</p><p class="kv"><b>Plazo</b>${esc(s.plazo)}</p>`;
+    if(missReq.length)h+=`<p class="kv"><b>Pendientes</b></p>`+ul(missReq);
+    if(s.any&&!anyOk)h+=`<p class="kv"><b>Falta</b>al menos un criterio de ${esc(s.any.t.split(' (')[0].toLowerCase())}</p>`;
+    if(anyMet.length)h+=`<p class="kv"><b>Cumple</b></p>`+ul(anyMet);
+    if(st.length)h+=`<p class="kv"><b>Impide</b></p>`+ul(st);
+    if(xd.length)h+=`<p class="kv"><b>Excluye</b></p>`+ul(xd);
+    if(xt.length)h+=`<p class="kv"><b>Resolver</b></p>`+ul(xt);
+    h+=`<div class="actions"><button type="button" class="primary" id="btnCopy">Copiar resumen</button><button type="button" id="btnTxt">Descargar .txt</button></div><div class="toast" id="toast"></div>`;
+    R.innerHTML=h;
+
+    const id=document.getElementById('caseId').value.trim();
+    const L=['Ley Ricarte Soto (Ley 20.850) - Verificación según Protocolos 2024',
+      'Fecha: '+(dateEl.value||'-')+(id?' | Caso: '+id:''),
+      'Escenario: '+s.title,'Resultado: '+verdict,'Fármaco garantizado: '+s.drug,'Plazo: '+s.plazo,'','Criterios obligatorios:'];
+    s.req.forEach(r=>L.push((val('req_'+r[0])?'[x] ':'[ ] ')+r[1]));
+    if(s.any){L.push('');L.push(s.any.t+':');s.any.items.forEach(r=>L.push((val('any_'+r[0])?'[x] ':'[ ] ')+r[1]));}
+    if(s.stop){L.push('');L.push('Condiciones que impiden el cambio: '+(st.join('; ')||'ninguna'));}
+    if(s.def){L.push('');L.push('Exclusiones definitivas: '+(xd.join('; ')||'ninguna'));L.push(s.tmpLabel+': '+(xt.join('; ')||'ninguna'));}
+    L.push('');L.push('Validación: plataforma Sistema de Información Ley Ricarte Soto (Fonasa).');
+    lastSummary=L.join('\n');
+
+    document.getElementById('btnCopy').onclick=async()=>{
+      const t=document.getElementById('toast');
+      try{await navigator.clipboard.writeText(lastSummary);t.textContent='Resumen copiado.';}
+      catch(e){const ta=document.createElement('textarea');ta.value=lastSummary;document.body.appendChild(ta);ta.select();
+        try{document.execCommand('copy');t.textContent='Resumen copiado.';}catch(_){t.textContent='No se pudo copiar; usa Descargar .txt.';}ta.remove();}
+    };
+    document.getElementById('btnTxt').onclick=()=>{
+      download(lastSummary,'LRS_'+cur+'_'+(dateEl.value||'caso')+'.txt','text/plain;charset=utf-8');
+      document.getElementById('toast').textContent='Resumen descargado.';
+    };
+  }
+  function download(content,name,type){
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;
+    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+  }
+  document.getElementById('btnPrint').onclick=()=>window.print();
+  document.getElementById('btnHtml').onclick=()=>download('<!DOCTYPE html>\n'+document.documentElement.outerHTML,'LRS_EII_verificador.html','text/html;charset=utf-8');
+  renderCrit();
+})();
+</script>
+</body>
+</html>
